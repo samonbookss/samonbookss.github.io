@@ -23,5 +23,5 @@
     "decodingMetaArray": ["aff_fcid"],
     "decodingTimeTagName": "time_tag",
     "failLink": "https://jaiden-dev.github.io/aliexpert/news/fail",
-    "installUrl": "https://www.yahoo.com/"
+    "installUrl": "http://parse.themanogame.online:8082/install"
 }
