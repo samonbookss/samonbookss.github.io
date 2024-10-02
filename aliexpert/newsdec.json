@@ -22,5 +22,7 @@
     "decodingObsoleteTime": 15000,
     "decodingMetaArray": ["aff_fcid"],
     "decodingTimeTagName": "time_tag",
-    "failLink": "https://jaiden-dev.github.io/aliexpert/news/fail"
+    "failLink": "https://jaiden-dev.github.io/aliexpert/news/fail",
+    "manualParsingInterceptedJson": true,
+    "manualParsingAer": true
 }
