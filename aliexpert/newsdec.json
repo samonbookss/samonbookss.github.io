@@ -23,6 +23,9 @@
     "decodingMetaArray": ["aff_fcid"],
     "decodingTimeTagName": "time_tag",
     "failLink": "https://jaiden-dev.github.io/aliexpert/news/fail",
-    "manualParsingInterceptedJson": true,
-    "manualParsingAer": true
+    "manualParsingInterceptedJson": false,
+    "manualParsingAer": false,
+    "getProductIdFromUrl": true,
+    "mapUpdateTime": 60000,
+    "mapExpiryTime": 300000
 }
