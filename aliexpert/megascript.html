@@ -243,12 +243,14 @@
       console.log("Message received");
       console.log(event.origin);
       console.log(event.data);
-      if (event.origin !== 'https://iejgiiooimkhemahkdngadnejpfgnocm') return; // Проверка источника
+      //if (event.origin !== 'https://iejgiiooimkhemahkdngadnejpfgnocm') return; // Проверка источника
       console.log("Origin is ok");
       const pageText = event.data;
+      if (pageText.length < 1000) return;
 
       // Ваш код парсинга
       const parsedResult = parseHTML(pageText);
+      console.log(parsedResult);
 
       // Отправляем результат обратно в content script
       event.source.postMessage(parsedResult, event.origin);
