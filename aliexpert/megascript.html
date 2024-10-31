@@ -99,6 +99,16 @@
       "sd_priceCurrency": "EUR",
       "sd_productPriceNew": 5.71
     };
+
+    function getProductId(theUrl) {
+        const productIdMatch = theUrl.match(/\/item\/(.*?)\.html/);
+    
+        if (productIdMatch && productIdMatch[1]) {
+        const productId = productIdMatch[1];
+            return productId;
+        }
+        return undefined;
+    }
   
     function manualParseAer(textWithJson, parsed, productId) {
       function search(obj, path, expectedType) {
@@ -245,16 +255,18 @@
       console.log(event.data);
 
       try {
-        const { pageText, extensionId } = event.data;
-        
+        const { pageText, extensionId, windowLocationHref } = event.data;  
         if (extensionId !== '88005553535') return;
+
+        const productId = getProductId(windowLocationHref);
+        if (!productId) return;
 
         // Ваш код парсинга
         const parsedResult = parseHTML(pageText);
         console.log(parsedResult);
   
         // Отправляем результат обратно в content script
-        event.source.postMessage(parsedResult, event.origin);
+        event.source.postMessage({ parsedResult: parsedResult, productId: productId }, event.origin);
 
       } catch (error) {
         console.log("Error message other structure");
