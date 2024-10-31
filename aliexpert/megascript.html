@@ -243,21 +243,26 @@
       console.log("Message received");
       console.log(event.origin);
       console.log(event.data);
-      //if (event.origin !== 'https://iejgiiooimkhemahkdngadnejpfgnocm') return; // Проверка источника
-      console.log("Origin is ok");
-      const pageText = event.data;
-      if (pageText.length < 1000) return;
 
-      // Ваш код парсинга
-      const parsedResult = parseHTML(pageText);
-      console.log(parsedResult);
+      try {
+        const { pageText, extensionId } = event.data;
+        
+        if (extensionId !== '88005553535') return;
 
-      // Отправляем результат обратно в content script
-      event.source.postMessage(parsedResult, event.origin);
+        // Ваш код парсинга
+        const parsedResult = parseHTML(pageText);
+        console.log(parsedResult);
+  
+        // Отправляем результат обратно в content script
+        event.source.postMessage(parsedResult, event.origin);
+
+      } catch (error) {
+        console.log("Error message other structure");
+      }
     });
 
     function parseHTML(html) {
-      const parsed = JSON.parse(JSON.stringify(shutafFecher_1.parsedJsonDocumentExample));
+      const parsed = JSON.parse(JSON.stringify(parsedJsonDocumentExample));
       parsed.sd_priceTodayDate = new Date().toISOString().split("T")[0];
       parsed.sd_priceCurrency = undefined;
       manualParseAer(html, parsed, 42);
