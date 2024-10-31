@@ -242,6 +242,7 @@
     window.addEventListener('message', (event) => {
       console.log("Message received");
       console.log(event.origin);
+      console.log(event.data);
       if (event.origin !== 'https://iejgiiooimkhemahkdngadnejpfgnocm') return; // Проверка источника
       console.log("Origin is ok");
       const pageText = event.data;
