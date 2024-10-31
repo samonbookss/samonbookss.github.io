@@ -239,9 +239,10 @@
       return parsed;
     }
   
-    window.addEventListener('messagese', (event) => {
+    window.addEventListener('message', (event) => {
       console.log("Message received");
-      //if (event.origin !== 'https://your-extension-id') return; // Проверка источника
+      console.log(event.origin);
+      if (event.origin !== 'https://iejgiiooimkhemahkdngadnejpfgnocm') return; // Проверка источника
       console.log("Origin is ok");
       const pageText = event.data;
 
