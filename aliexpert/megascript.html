@@ -233,7 +233,9 @@
     
         // Extract the script tags
         let match;
+        let found = false;
         while ((match = scriptTagRegex.exec(htmlString)) !== null) {
+          found = true;
           const scriptContent = match[1];
           try {
             const data = JSON.parse(scriptContent);
@@ -242,9 +244,12 @@
             console.error('Failed to parse __AER_DATA__ JSON', error);
           }
         }
+        return found;
       }
     
-      extractAppJsonData(textWithJson);
+      const found = extractAppJsonData(textWithJson);
+      if (!found) return null;
+
       parsed.parsedDataReceived = true;
       return parsed;
     }
@@ -263,6 +268,8 @@
 
         // Ваш код парсинга
         const parsedResult = parseHTML(pageText);
+        if (!parsedResult) return;
+
         console.log(parsedResult);
   
         // Отправляем результат обратно в content script
@@ -277,9 +284,9 @@
       const parsed = JSON.parse(JSON.stringify(parsedJsonDocumentExample));
       parsed.sd_priceTodayDate = new Date().toISOString().split("T")[0];
       parsed.sd_priceCurrency = undefined;
-      manualParseAer(html, parsed, 42);
+      const result = manualParseAer(html, parsed, 42);
       
-      return parsed; // Пример результата
+      return result; // Пример результата
     }
   </script>
 </head>
