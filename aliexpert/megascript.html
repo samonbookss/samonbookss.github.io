@@ -378,14 +378,14 @@
                 if (!productId) return;
 
                 if (parseType === 'AER') {
-                    const parsedResult = manualParseAer(pageText, productId);
+                    const parsedResult = manualParseAer(dataText, productId);
                     if (!parsedResult) return;
                     console.log("AER parsed successfully");
                     console.log(parsedResult);
                     event.source.postMessage({ parsedResult: parsedResult, productId: productId }, event.origin);
                 }
                 else if (parseType === 'INTERCEPTED_JSON') {
-                    const parsedResult = manualParseInterceptedJson(pageText, productId);
+                    const parsedResult = manualParseInterceptedJson(dataText, productId);
                     if (!parsedResult) return;
                     console.log("INTERCEPTED_JSON parsed successfully");
                     console.log(parsedResult);
