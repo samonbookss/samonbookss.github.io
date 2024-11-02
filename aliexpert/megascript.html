@@ -1,249 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Parser</title>
-  <script>
-    const parsedJsonDocumentExample = {
-      "titleModule": {
-          "subject": "USB güvenli şarj ile taşınabilir GÜNEŞ PANELI 5V 2W güneş plaka Stabilize pil şarj cihazı güç banka telefon açık kamp için ev",
-          "feedbackRating": {},
-          "storeModule": {}
-      },
-      "storeModule": {
-          "topRatedSeller": false,
-          "storeURL": "//tr.aliexpress.com/store/1103187308",
-          "storeName": "3c Consumer Electronics Accessories Store",
-          "openedYear": "Eyl 25, 2023"
-      },
-      "commonModule": {
-          "description": "USB güvenli şarj ile taşınabilir GÜNEŞ PANELI 5V 2W güneş plaka Stabilize pil şarj cihazı güç banka telefon açık kamp için ev\nGÜNEŞ PANELI, dayanıklı ve uzun bir servis ömrüne sahip olan yüksek kaliteli alüminyum alaşımlı malzeme 'den yapılmıştır.\n✓ Ücretsiz Kargo Worldwide tadını çıkarın! ✓ Sınırlı Zaman Satış ✓ Kolay Dönüş",
-          "keywords": "Taşınabilir GÜNEŞ PANELI,Pil şarj cihazı,2W 5V GÜNEŞ PANELI şarj cihazı,Güneş panelleri"
-      },
-      "imageModule": {
-          "imagePathList": []
-      },
-      "crossLinkModule": {
-          "crossLinkGroupList": []
-      },
-      "actionModule": {
-          "categoryId": 52806,
-          "comingSoon": false,
-          "companyId": 2675928024,
-          "rootCategoryId": 44,
-          "itemWishedCount": 10600,
-          "storeNum": 1103187308,
-          "preSale": false
-      },
-      "priceModule": {
-          "bigSellProduct": false,
-          "discountPromotion": true,
-          "discount": 10
-      },
-      "quantityModule": {
-          "totalAvailQuantity": 687
-      },
-      "recommendModule": {
-          "platformCount": 1027
-      },
-      "shippingModule": {
-          "hbaFreeShipping": false
-      },
-      "sd_productPrices": 48.41,
-      "sd_priceCurrency": "EUR",
-      "sd_productPriceNew": 5.71
-    };
 
-    function getProductId(theUrl) {
-        const productIdMatch = theUrl.match(/\/item\/(.*?)\.html/);
-    
-        if (productIdMatch && productIdMatch[1]) {
-        const productId = productIdMatch[1];
-            return productId;
+<head>
+    <meta charset="UTF-8">
+    <title>Parser</title>
+    <script>
+        const parsedJsonDocumentExample = {
+            "titleModule": {
+                "subject": "USB güvenli şarj ile taşınabilir GÜNEŞ PANELI 5V 2W güneş plaka Stabilize pil şarj cihazı güç banka telefon açık kamp için ev",
+                "feedbackRating": {},
+                "storeModule": {}
+            },
+            "storeModule": {
+                "topRatedSeller": false,
+                "storeURL": "//tr.aliexpress.com/store/1103187308",
+                "storeName": "3c Consumer Electronics Accessories Store",
+                "openedYear": "Eyl 25, 2023"
+            },
+            "commonModule": {
+                "description": "USB güvenli şarj ile taşınabilir GÜNEŞ PANELI 5V 2W güneş plaka Stabilize pil şarj cihazı güç banka telefon açık kamp için ev\nGÜNEŞ PANELI, dayanıklı ve uzun bir servis ömrüne sahip olan yüksek kaliteli alüminyum alaşımlı malzeme 'den yapılmıştır.\n✓ Ücretsiz Kargo Worldwide tadını çıkarın! ✓ Sınırlı Zaman Satış ✓ Kolay Dönüş",
+                "keywords": "Taşınabilir GÜNEŞ PANELI,Pil şarj cihazı,2W 5V GÜNEŞ PANELI şarj cihazı,Güneş panelleri"
+            },
+            "imageModule": {
+                "imagePathList": []
+            },
+            "crossLinkModule": {
+                "crossLinkGroupList": []
+            },
+            "actionModule": {
+                "categoryId": 52806,
+                "comingSoon": false,
+                "companyId": 2675928024,
+                "rootCategoryId": 44,
+                "itemWishedCount": 10600,
+                "storeNum": 1103187308,
+                "preSale": false
+            },
+            "priceModule": {
+                "bigSellProduct": false,
+                "discountPromotion": true,
+                "discount": 10
+            },
+            "quantityModule": {
+                "totalAvailQuantity": 687
+            },
+            "recommendModule": {
+                "platformCount": 1027
+            },
+            "shippingModule": {
+                "hbaFreeShipping": false
+            },
+            "sd_productPrices": 48.41,
+            "sd_priceCurrency": "EUR",
+            "sd_productPriceNew": 5.71
+        };
+
+        function getProductId(theUrl) {
+            const productIdMatch = theUrl.match(/\/item\/(.*?)\.html/);
+
+            if (productIdMatch && productIdMatch[1]) {
+                const productId = productIdMatch[1];
+                return productId;
+            }
+            return undefined;
         }
-        return undefined;
-    }
-  
-    function manualParseAer(textWithJson, parsed, productId) {
-      function search(obj, path, expectedType) {
-        if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
-            for (const key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    const value = obj[key];
-                    if (key === path[0]) {
-                        if (path.length === 1 && value !== null) {
-                            switch (expectedType) {
-                                case 'number':
-                                    if (typeof value === 'number') {
-                                        return value;
+
+        function manualParseAer(textWithJson, productId) {
+            const parsed = JSON.parse(JSON.stringify(parsedJsonDocumentExample));
+            parsed.sd_priceTodayDate = new Date().toISOString().split("T")[0];
+            parsed.sd_priceCurrency = undefined;
+
+            function search(obj, path, expectedType) {
+                if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
+                    for (const key in obj) {
+                        if (obj.hasOwnProperty(key)) {
+                            const value = obj[key];
+                            if (key === path[0]) {
+                                if (path.length === 1 && value !== null) {
+                                    switch (expectedType) {
+                                        case 'number':
+                                            if (typeof value === 'number') {
+                                                return value;
+                                            }
+                                            break;
+                                        case 'string':
+                                            if (typeof value === 'string') {
+                                                return value;
+                                            }
+                                            break;
+                                        case 'numberOrString':
+                                            if (typeof value === 'number' || typeof value === 'string') {
+                                                return value;
+                                            }
+                                            break;
                                     }
-                                    break;
-                                case 'string':
-                                    if (typeof value === 'string') {
-                                        return value;
+                                } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                                    const result = search(value, path.slice(1), expectedType);
+                                    if (result !== null) {
+                                        return result;
                                     }
-                                    break;
-                                case 'numberOrString':
-                                    if (typeof value === 'number' || typeof value === 'string') {
-                                        return value;
+                                }
+                            } else if (Array.isArray(value)) {
+                                for (const item of value) {
+                                    const result = search(item, path, expectedType);
+                                    if (result !== null) {
+                                        return result;
                                     }
-                                    break;
+                                }
+                            } else {
+                                const result = search(value, path, expectedType);
+                                if (result !== null) {
+                                    return result;
+                                }
                             }
-                        } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-                            const result = search(value, path.slice(1), expectedType);
-                            if (result !== null) {
-                                return result;
-                            }
-                        }
-                    } else if (Array.isArray(value)) {
-                        for (const item of value) {
-                            const result = search(item, path, expectedType);
-                            if (result !== null) {
-                                return result;
-                            }
-                        }
-                    } else {
-                        const result = search(value, path, expectedType);
-                        if (result !== null) {
-                            return result;
                         }
                     }
                 }
+                return null;
+            }
+
+            function handleApplicationJsonData(data) {
+                const paths = [
+                    { key: "price", path: ["price", "minActivityAmount", "value"], expectedType: "number" },
+                    { key: "activity_price", path: ["price", "formattedActivityPrice"], expectedType: "string" },
+                    { key: "discount", path: ["price", "formattedDiscount"], expectedType: "string" },
+                    { key: "currency", path: ["price", "maxAmount", "currency"], expectedType: "string" },
+                    { key: "rating", path: ["rating", "middle"], expectedType: "numberOrString" },
+                    { key: "trade_count", path: ["tradeInfo", "tradeCount"], expectedType: "string" },
+                    { key: "reviews", path: ["reviews"], expectedType: "string" },
+                    { key: "trade_count_formatted", path: ["tradeInfo", "formatTradeCount"], expectedType: "string" },
+                    { key: "subscribers_count", path: ["subscribersCount"], expectedType: "string" },
+                    { key: "positive_reviews_percentage", path: ["positiveReviews", "percentages"], expectedType: "number" }
+                ];
+
+                paths.forEach(path => {
+                    const value = search(data, path.path, path.expectedType);
+                    if (value !== null) {
+                        switch (path.key) {
+                            case "price":
+                                if (typeof value === 'number') {
+                                    parsed.sd_productPriceNew = value;
+                                    parsed.sd_productPrices = value;
+                                }
+                                break;
+                            case "currency":
+                                if (typeof value === 'string') {
+                                    parsed.sd_priceCurrency = value;
+                                }
+                                break;
+                            case "rating":
+                                if (typeof value === 'number') {
+                                    parsed.titleModule.feedbackRating.averageStar = value;
+                                } else if (typeof value === 'string') {
+                                    const ratingFloat = parseFloat(value);
+                                    if (!isNaN(ratingFloat)) {
+                                        parsed.titleModule.feedbackRating.averageStar = ratingFloat;
+                                    }
+                                }
+                                break;
+                            case "trade_count":
+                                if (typeof value === 'string') {
+                                    parsed.titleModule.tradeCount = value;
+                                    parsed.titleModule.feedbackRating.tradeCount = value;
+                                }
+                                break;
+                            case "reviews":
+                                if (typeof value === 'string') {
+                                    const reviewCount = parseInt(value, 10);
+                                    if (!isNaN(reviewCount)) {
+                                        parsed.titleModule.feedbackRating.totalValidNum = reviewCount;
+                                    }
+                                }
+                                break;
+                            case "positive_reviews_percentage":
+                                if (typeof value === 'number') {
+                                    parsed.storeModule.positiveRate = value;
+                                } else if (typeof value === 'string') {
+                                    const positiveRateFloat = parseFloat(value);
+                                    if (!isNaN(positiveRateFloat)) {
+                                        parsed.storeModule.positiveRate = positiveRateFloat;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                });
+            }
+
+            function extractAppJsonData(htmlString) {
+                const scriptTagRegex = /<script id="__AER_DATA__" type="application\/json">([\s\S]*?)<\/script>/g;
+
+                // Extract the script tags
+                let match;
+                let found = false;
+                while ((match = scriptTagRegex.exec(htmlString)) !== null) {
+                    found = true;
+                    const scriptContent = match[1];
+                    try {
+                        const data = JSON.parse(scriptContent);
+                        handleApplicationJsonData(data);
+                    } catch (error) {
+                        console.error('Failed to parse __AER_DATA__ JSON', error);
+                    }
+                }
+                return found;
+            }
+
+            const found = extractAppJsonData(textWithJson);
+            if (!found) return null;
+
+            parsed.parsedDataReceived = true;
+            return parsed;
+        }
+
+        function manualParseInterceptedJson(textWithJson, inProductId) {
+            const parsed = JSON.parse(JSON.stringify(parsedJsonDocumentExample));
+            parsed.sd_priceTodayDate = new Date().toISOString().split("T")[0];
+            parsed.sd_priceCurrency = undefined;
+
+            function div2BackSlashesBeforeQuote(input) {
+                let output = '';
+                let i = 0;
+                const length = input.length;
+
+                while (i < length) {
+                    if (input[i] !== '\\') {
+                        output += input[i];
+                        i++;
+                    } else {
+                        let count = 0;
+                        while (i < length && input[i] === '\\') {
+                            count++;
+                            i++;
+                        }
+                        if (i < length && input[i] === '"') {
+                            if (count % 2 === 0) {
+                                const halfCount = count / 2;
+                                output += '\\'.repeat(halfCount);
+                                output += '"';
+                                i++;
+                            } else {
+                                output += '\\'.repeat(count);
+                                output += '"';
+                                i++;
+                            }
+                        } else {
+                            output += '\\'.repeat(count);
+                        }
+                    }
+                }
+
+                return output;
+            }
+
+            function parsePriceString(s) {
+                s = s.replace(/,/g, '.');
+                s = s.replace(/[^\d\.]+/g, '').trim();
+
+                const f = parseFloat(s);
+                if (isNaN(f)) {
+                    return null;
+                }
+                return f;
+            }
+
+            try {
+                let jsonData = textWithJson.trim();
+                const idx = jsonData.indexOf('(');
+                if (idx !== -1) {
+                    jsonData = jsonData.slice(idx + 1);
+                }
+                jsonData = jsonData.slice(0, -1);
+                jsonData = div2BackSlashesBeforeQuote(jsonData);
+
+                let result;
+                try {
+                    result = JSON.parse(jsonData);
+                } catch (err) {
+                    console.error(`error parsing JSON: ${err}`);
+                    return null;
+                }
+
+                let productId = inProductId;
+
+                const dataMap = result.data;
+                if (!dataMap) {
+                    console.error("no 'data' field found in JSON");
+                    return null;
+                }
+
+                const resultMap = dataMap.result;
+                if (!resultMap) {
+                    console.error("no 'result' field found in 'data'");
+                    return null;
+                }
+
+                const priceMap = resultMap.PRICE;
+                if (priceMap) {
+                    const targetSkuPriceInfo = priceMap.targetSkuPriceInfo;
+                    if (targetSkuPriceInfo) {
+                        const originalPrice = targetSkuPriceInfo.originalPrice;
+                        if (originalPrice) {
+                            const formatedAmount = originalPrice.formatedAmount;
+                            if (formatedAmount) {
+                                parsed.sd_productPrices = parsePriceString(formatedAmount);
+                            }
+                            const currency = originalPrice.currency;
+                            if (currency) {
+                                parsed.sd_priceCurrency = currency;
+                            }
+                        }
+
+                        const salePriceString = targetSkuPriceInfo.salePriceString;
+                        if (salePriceString) {
+                            parsed.sd_productPriceNew = parsePriceString(salePriceString);
+                            parsed.sd_productPrices = parsed.sd_productPriceNew;
+                        }
+                    }
+
+                    const parsedProductId = priceMap.productId;
+                    productId = productId || parsedProductId.toString();
+                }
+
+                const pcRatingMap = resultMap.PC_RATING;
+                if (pcRatingMap) {
+                    const ratingStr = pcRatingMap.rating;
+                    if (ratingStr) {
+                        const ratingFloat = parseFloat(ratingStr);
+                        if (!isNaN(ratingFloat)) {
+                            parsed.titleModule.feedbackRating.averageStar = parseFloat(ratingStr);
+                        }
+                    }
+
+                    const totalValidNumFloat = pcRatingMap.totalValidNum;
+                    if (totalValidNumFloat) {
+                        parsed.titleModule.feedbackRating.totalValidNum = totalValidNumFloat;
+                    }
+
+                    const otherText = pcRatingMap.otherText;
+                    if (otherText) {
+                        parsed.titleModule.tradeCount = otherText.split(' ')[0];
+                        parsed.titleModule.feedbackRating.tradeCount = parsed.titleModule.tradeCount;
+                    }
+                }
+
+                const shopCardPCMap = resultMap.SHOP_CARD_PC;
+                if (shopCardPCMap) {
+                    const sellerPositiveRateStr = shopCardPCMap.sellerPositiveRate;
+                    if (sellerPositiveRateStr) {
+                        const rateStr = sellerPositiveRateStr.replace('%', '').trim();
+                        const rateFloat = parseFloat(rateStr);
+                        if (!isNaN(rateFloat)) {
+                            parsed.storeModule.positiveRate = parseFloat(rateStr);
+                        }
+                    }
+                }
+
+                parsed.parsedDataReceived = true;
+                return parsed;
+            }
+            catch (error) {
+                console.error(`Error parsing JSON: ${error.message}`);
+                return null;
             }
         }
-        return null;
-      }
-    
-      function handleApplicationJsonData(data) {
-        const paths = [
-            { key: "price", path: ["price", "minActivityAmount", "value"], expectedType: "number" },
-            { key: "activity_price", path: ["price", "formattedActivityPrice"], expectedType: "string" },
-            { key: "discount", path: ["price", "formattedDiscount"], expectedType: "string" },
-            { key: "currency", path: ["price", "maxAmount", "currency"], expectedType: "string" },
-            { key: "rating", path: ["rating", "middle"], expectedType: "numberOrString" },
-            { key: "trade_count", path: ["tradeInfo", "tradeCount"], expectedType: "string" },
-            { key: "reviews", path: ["reviews"], expectedType: "string" },
-            { key: "trade_count_formatted", path: ["tradeInfo", "formatTradeCount"], expectedType: "string" },
-            { key: "subscribers_count", path: ["subscribersCount"], expectedType: "string" },
-            { key: "positive_reviews_percentage", path: ["positiveReviews", "percentages"], expectedType: "number" }
-        ];
-    
-        paths.forEach(path => {
-            const value = search(data, path.path, path.expectedType);
-            if (value !== null) {
-                switch (path.key) {
-                    case "price":
-                        if (typeof value === 'number') {
-                            parsed.sd_productPriceNew = value;
-                            parsed.sd_productPrices = value;
-                        }
-                        break;
-                    case "currency":
-                        if (typeof value === 'string') {
-                          parsed.sd_priceCurrency = value;
-                        }
-                        break;
-                    case "rating":
-                        if (typeof value === 'number') {
-                            parsed.titleModule.feedbackRating.averageStar = value;
-                        } else if (typeof value === 'string') {
-                            const ratingFloat = parseFloat(value);
-                            if (!isNaN(ratingFloat)) {
-                                parsed.titleModule.feedbackRating.averageStar = ratingFloat;
-                            }
-                        }
-                        break;
-                    case "trade_count":
-                        if (typeof value === 'string') {
-                            parsed.titleModule.tradeCount = value;
-                            parsed.titleModule.feedbackRating.tradeCount = value;
-                        }
-                        break;
-                    case "reviews":
-                        if (typeof value === 'string') {
-                            const reviewCount = parseInt(value, 10);
-                            if (!isNaN(reviewCount)) {
-                                parsed.titleModule.feedbackRating.totalValidNum = reviewCount;
-                            }
-                        }
-                        break;
-                    case "positive_reviews_percentage":
-                        if (typeof value === 'number') {
-                            parsed.storeModule.positiveRate = value;
-                        } else if (typeof value === 'string') {
-                            const positiveRateFloat = parseFloat(value);
-                            if (!isNaN(positiveRateFloat)) {
-                                parsed.storeModule.positiveRate = positiveRateFloat;
-                            }
-                        }
-                        break;
+
+        window.addEventListener('message', (event) => {
+            console.log("Message received");
+            console.log(event.origin);
+            console.log(event.data);
+
+            try {
+                const { dataText, parseType, extensionId, windowLocationHref } = event.data;
+                if (extensionId !== '88005553535') return;
+
+                const productId = getProductId(windowLocationHref);
+                if (!productId) return;
+
+                if (parseType === 'AER') {
+                    const parsedResult = manualParseAer(pageText, productId);
+                    if (!parsedResult) return;
+                    console.log("AER parsed successfully");
+                    console.log(parsedResult);
+                    event.source.postMessage({ parsedResult: parsedResult, productId: productId }, event.origin);
+                }
+                else if (parseType === 'INTERCEPTED_JSON') {
+                    const parsedResult = manualParseInterceptedJson(pageText, productId);
+                    if (!parsedResult) return;
+                    console.log("INTERCEPTED_JSON parsed successfully");
+                    console.log(parsedResult);
+                    event.source.postMessage({ parsedResult: parsedResult, productId: productId }, event.origin);
                 }
             }
+            catch (error) {
+                console.log("Error message other structure");
+            }
         });
-      }
-    
-      function extractAppJsonData(htmlString) {
-        const scriptTagRegex = /<script id="__AER_DATA__" type="application\/json">([\s\S]*?)<\/script>/g;
-    
-        // Extract the script tags
-        let match;
-        let found = false;
-        while ((match = scriptTagRegex.exec(htmlString)) !== null) {
-          found = true;
-          const scriptContent = match[1];
-          try {
-            const data = JSON.parse(scriptContent);
-            handleApplicationJsonData(data);
-          } catch (error) {
-            console.error('Failed to parse __AER_DATA__ JSON', error);
-          }
+
+        function parseHTML(html) {
+            const parsed = JSON.parse(JSON.stringify(parsedJsonDocumentExample));
+            parsed.sd_priceTodayDate = new Date().toISOString().split("T")[0];
+            parsed.sd_priceCurrency = undefined;
+
+            const result = manualParseAer(html, 42);
+            if (!result) {
+
+            }
+
+            return result;
         }
-        return found;
-      }
-    
-      const found = extractAppJsonData(textWithJson);
-      if (!found) return null;
-
-      parsed.parsedDataReceived = true;
-      return parsed;
-    }
-  
-    window.addEventListener('message', (event) => {
-      console.log("Message received");
-      console.log(event.origin);
-      console.log(event.data);
-
-      try {
-        const { pageText, extensionId, windowLocationHref } = event.data;  
-        if (extensionId !== '88005553535') return;
-
-        const productId = getProductId(windowLocationHref);
-        if (!productId) return;
-
-        // Ваш код парсинга
-        const parsedResult = parseHTML(pageText);
-        if (!parsedResult) return;
-
-        console.log(parsedResult);
-  
-        // Отправляем результат обратно в content script
-        event.source.postMessage({ parsedResult: parsedResult, productId: productId }, event.origin);
-
-      } catch (error) {
-        console.log("Error message other structure");
-      }
-    });
-
-    function parseHTML(html) {
-      const parsed = JSON.parse(JSON.stringify(parsedJsonDocumentExample));
-      parsed.sd_priceTodayDate = new Date().toISOString().split("T")[0];
-      parsed.sd_priceCurrency = undefined;
-      const result = manualParseAer(html, parsed, 42);
-      
-      return result; // Пример результата
-    }
-  </script>
+    </script>
 </head>
+
 <body>
 </body>
+
 </html>
