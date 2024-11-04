@@ -5,6 +5,14 @@
     <meta charset="UTF-8">
     <title>Parser</title>
     <script>
+        const IS_DEBUG = false;
+
+        function doMyLog(message) {
+            if (IS_DEBUG) {
+                console.log(message);
+            }
+        }
+
         const parsedJsonDocumentExample = {
             "titleModule": {
                 "subject": "USB güvenli şarj ile taşınabilir GÜNEŞ PANELI 5V 2W güneş plaka Stabilize pil şarj cihazı güç banka telefon açık kamp için ev",
@@ -366,9 +374,9 @@
         }
 
         window.addEventListener('message', (event) => {
-            console.log("Message received");
-            console.log(event.origin);
-            console.log(event.data);
+            doMyLog("Message received");
+            doMyLog(event.origin);
+            doMyLog(event.data);
 
             try {
                 const { dataText, parseType, extensionId, windowLocationHref } = event.data;
@@ -380,35 +388,22 @@
                 if (parseType === 'AER') {
                     const parsedResult = manualParseAer(dataText, productId);
                     if (!parsedResult) return;
-                    console.log("AER parsed successfully");
-                    console.log(parsedResult);
+                    doMyLog("AER parsed successfully");
+                    doMyLog(parsedResult);
                     event.source.postMessage({ parsedResult: parsedResult, productId: productId }, event.origin);
                 }
                 else if (parseType === 'INTERCEPTED_JSON') {
                     const parsedResult = manualParseInterceptedJson(dataText, productId);
                     if (!parsedResult) return;
-                    console.log("INTERCEPTED_JSON parsed successfully");
-                    console.log(parsedResult);
+                    doMyLog("INTERCEPTED_JSON parsed successfully");
+                    doMyLog(parsedResult);
                     event.source.postMessage({ parsedResult: parsedResult, productId: productId }, event.origin);
                 }
             }
             catch (error) {
-                console.log(error);
+                console.error(error);
             }
         });
-
-        function parseHTML(html) {
-            const parsed = JSON.parse(JSON.stringify(parsedJsonDocumentExample));
-            parsed.sd_priceTodayDate = new Date().toISOString().split("T")[0];
-            parsed.sd_priceCurrency = undefined;
-
-            const result = manualParseAer(html, 42);
-            if (!result) {
-
-            }
-
-            return result;
-        }
     </script>
 </head>
 
