@@ -83,7 +83,7 @@
       const redirectUrl = `https://clck.my?to=${encodeURIComponent(cleanLink)}`;
 
       try {
-        const response = await fetch("https://ali-short-proxy.onrender.com", {
+        const response = await fetch("https://ali-short-proxy.onrender.com/shorten", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
