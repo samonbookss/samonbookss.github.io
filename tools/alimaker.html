@@ -2,49 +2,122 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Сокращатель AliExpress</title>
+  <title>AliExpress Сокращатель</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --primary: #e60023;
+      --bg: #f9f9f9;
+      --text: #1a1a1a;
+      --gray: #ccc;
+      --radius: 12px;
+      --transition: 0.25s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-      color: #333;
-      max-width: 600px;
-      margin: auto;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     h1 {
-      color: #d62828;
+      color: var(--primary);
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
     }
 
     input, button {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 14px;
+      margin-top: 12px;
       font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray);
+      transition: var(--transition);
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      outline: none;
     }
 
     button {
-      background-color: #d62828;
+      background-color: var(--primary);
       color: white;
       border: none;
+      font-weight: 600;
       cursor: pointer;
     }
 
     button:hover {
-      background-color: #b71c1c;
+      background-color: #cc001f;
     }
 
     .result {
       margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .short-link {
+      background: #f1f1f1;
       padding: 12px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: var(--radius);
       word-break: break-all;
+      text-align: center;
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .copy-btn {
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background: #333;
+    }
+
+    .copied {
+      color: green;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .copied.show {
+      opacity: 1;
     }
   </style>
 </head>
@@ -52,22 +125,32 @@
 
   <h1>AliExpress Сокращатель</h1>
 
-  <label for="aliLink">Ссылка на товар AliExpress:</label>
-  <input type="text" id="aliLink" placeholder="Вставьте ссылку на товар">
+  <div class="container">
+    <label for="aliLink">Ссылка на товар:</label>
+    <input type="text" id="aliLink" placeholder="Вставьте ссылку на AliExpress">
 
-  <button onclick="shortenAliLink()">Сократить ссылку</button>
+    <button onclick="shortenAliLink()">Сократить</button>
 
-  <div class="result" id="result" style="display: none;"></div>
+    <div class="result" id="result" style="display: none;">
+      <div class="short-link" id="shortLink"></div>
+      <button class="copy-btn" onclick="copyToClipboard()">Скопировать</button>
+      <div class="copied" id="copiedMsg">Скопировано!</div>
+    </div>
+  </div>
 
   <script>
     async function shortenAliLink() {
       const aliLink = document.getElementById('aliLink').value.trim();
       const resultBox = document.getElementById('result');
+      const shortLinkBox = document.getElementById('shortLink');
+      const copiedMsg = document.getElementById('copiedMsg');
+
       resultBox.style.display = 'none';
-      resultBox.textContent = '';
+      shortLinkBox.textContent = '';
+      copiedMsg.classList.remove('show');
 
       if (!aliLink) {
-        alert("Пожалуйста, вставьте ссылку на товар.");
+        alert("Пожалуйста, вставьте ссылку.");
         return;
       }
 
@@ -94,18 +177,28 @@
         const data = await response.json();
 
         if (response.ok && data.url) {
-          resultBox.textContent = `Короткая ссылка: ${data.url}`;
-          resultBox.style.display = 'block';
+          shortLinkBox.textContent = data.url;
+          resultBox.style.display = 'flex';
         } else {
-          resultBox.textContent = "Ошибка при сокращении ссылки.";
-          resultBox.style.display = 'block';
+          shortLinkBox.textContent = "Ошибка при сокращении ссылки.";
+          resultBox.style.display = 'flex';
         }
 
       } catch (error) {
         console.error(error);
-        resultBox.textContent = "Произошла ошибка при соединении.";
-        resultBox.style.display = 'block';
+        shortLinkBox.textContent = "Произошла ошибка соединения.";
+        resultBox.style.display = 'flex';
       }
+    }
+
+    function copyToClipboard() {
+      const shortLink = document.getElementById('shortLink').textContent;
+      const copiedMsg = document.getElementById('copiedMsg');
+
+      navigator.clipboard.writeText(shortLink).then(() => {
+        copiedMsg.classList.add('show');
+        setTimeout(() => copiedMsg.classList.remove('show'), 2000);
+      });
     }
   </script>
 
