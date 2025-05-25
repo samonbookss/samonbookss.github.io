@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AliExpress Сокращатель</title>
+  <style>
+    :root {
+      --primary-color: #ff4747;
+      --background: #f9f9f9;
+      --text-color: #333;
+      --border-radius: 12px;
+      --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: var(--font-family);
+      background: var(--background);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input[type="text"] {
+      padding: 14px;
+      font-size: 1rem;
+      border: 2px solid #ddd;
+      border-radius: var(--border-radius);
+      width: 100%;
+      transition: border 0.3s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    button {
+      padding: 14px;
+      font-size: 1rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #e03e3e;
+    }
+
+    .result {
+      word-break: break-all;
+      background: white;
+      padding: 12px;
+      border-radius: var(--border-radius);
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      input, button {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>AliExpress Сокращатель</h1>
+  <div class="container">
+    <input type="text" id="inputLink" placeholder="Вставьте ссылку на товар AliExpress">
+    <button onclick="shortenLink()">Очистить и сократить</button>
+    <div id="resultContainer" style="display: none;">
+      <div class="result" id="shortLink"></div>
+      <button onclick="copyToClipboard()">Скопировать</button>
+    </div>
+  </div>
+
+  <script>
+    function shortenLink() {
+      const input = document.getElementById('inputLink').value.trim();
+      const regex = /(https:\/\/(?:www\.)?aliexpress\.(?:com|ru|us|.*?))\/item\/(\d+)\.html/;
+      const match = input.match(regex);
+
+      if (match && match[1] && match[2]) {
+        const cleanLink = `${match[1]}/item/${match[2]}.html`;
+        const encoded = encodeURIComponent(cleanLink);
+        const finalLink = `https://clck.my?to=${encoded}`;
+
+        document.getElementById('shortLink').textContent = finalLink;
+        document.getElementById('resultContainer').style.display = 'block';
+      } else {
+        alert("Пожалуйста, введите корректную ссылку на товар AliExpress.");
+      }
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById('shortLink').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Ссылка скопирована в буфер обмена!");
+      }).catch(err => {
+        alert("Ошибка при копировании: " + err);
+      });
+    }
+  </script>
+</body>
+</html>
