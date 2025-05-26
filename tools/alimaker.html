@@ -72,7 +72,7 @@
       border-radius: var(--radius);
       border: 1px solid var(--gray);
       transition: var(--transition);
-      margin-bottom: 12px; /* ← добавили отступ */
+      margin-bottom: 12px;
     }
 
     input:focus {
@@ -146,6 +146,10 @@
     .copied.show {
       opacity: 1;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -153,7 +157,8 @@
   <h1>Сокращатель ссылок</h1>
 
   <div class="container">
-    <button class="btn" onclick="pasteFromClipboard()">Вставить из буфера</button>
+    <!-- Кнопка вставки из буфера, будет скрыта, если Clipboard API недоступен -->
+    <button class="btn hidden" id="pasteBtn" onclick="pasteFromClipboard()">Вставить из буфера</button>
 
     <input type="text" id="linkInput" placeholder="Вставьте или введите ссылку">
 
@@ -169,8 +174,17 @@
   </div>
 
   <script>
+    // Проверка поддержки Clipboard API и отображение кнопки
+    document.addEventListener('DOMContentLoaded', () => {
+      const pasteBtn = document.getElementById('pasteBtn');
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        pasteBtn.classList.remove('hidden');
+      }
+    });
+
     async function pasteFromClipboard() {
       const input = document.getElementById('linkInput');
+
       try {
         const text = await navigator.clipboard.readText();
         input.value = text;
