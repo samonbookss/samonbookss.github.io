@@ -75,6 +75,14 @@
       background-color: #cc001f;
     }
 
+    #pasteBtn {
+      background-color: #555;
+    }
+
+    #pasteBtn:hover {
+      background-color: #333;
+    }
+
     .result {
       margin-top: 20px;
       display: flex;
@@ -158,6 +166,8 @@
     <input type="text" id="linkInput" placeholder="Вставьте любую ссылку">
 
     <button id="shortenBtn" onclick="shortenLink()">Сократить</button>
+    <button id="pasteBtn" style="display: none;" onclick="pasteFromClipboard()">Вставить ссылку из буфера</button>
+
     <div class="spinner" id="spinner"></div>
 
     <div class="result" id="result" style="display: none;">
@@ -189,7 +199,7 @@
 
       try {
         const url = new URL(originalUrl);
-        const cleanedUrl = `${url.origin}${url.pathname}`; // удаляем всё после ?
+        const cleanedUrl = `${url.origin}${url.pathname}`;
 
         const redirectUrl = `https://clck.my?to=${encodeURIComponent(cleanedUrl)}`;
 
@@ -234,6 +244,44 @@
         setTimeout(() => copiedMsg.classList.remove('show'), 2000);
       });
     }
+
+    function isValidUrl(text) {
+      try {
+        const url = new URL(text);
+        return url.protocol === "http:" || url.protocol === "https:";
+      } catch (_) {
+        return false;
+      }
+    }
+
+    async function checkClipboard() {
+      const pasteBtn = document.getElementById('pasteBtn');
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          if (isValidUrl(text)) {
+            pasteBtn.style.display = 'block';
+            pasteBtn.dataset.clipboardUrl = text;
+          }
+        }
+      } catch (err) {
+        console.warn("Clipboard access denied or not available", err);
+      }
+    }
+
+    function pasteFromClipboard() {
+      const input = document.getElementById('linkInput');
+      const pasteBtn = document.getElementById('pasteBtn');
+      const url = pasteBtn.dataset.clipboardUrl;
+
+      if (url) {
+        input.value = url;
+        pasteBtn.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', checkClipboard);
   </script>
 
 </body>
