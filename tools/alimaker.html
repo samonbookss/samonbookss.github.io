@@ -189,7 +189,7 @@
 
         let finalUrl = originalUrl;
 
-        // Проверка на ссылку вида a.aliexpress.*
+        // Проверка на короткую ссылку AliExpress (a.aliexpress.*)
         const isAliShort = /^https?:\/\/a\.aliexpress\./i.test(originalUrl);
 
         if (isAliShort) {
@@ -215,7 +215,11 @@
         const url = new URL(finalUrl);
         const cleanedUrl = `${url.origin}${url.pathname}`;
 
-        const redirectUrl = `https://clck.my?to=${encodeURIComponent(cleanedUrl)}`;
+        // Если домен содержит "aliexpress", оборачиваем в clck.my
+        const isAliDomain = url.hostname.includes("aliexpress");
+        const redirectUrl = isAliDomain
+          ? `https://clck.my?to=${encodeURIComponent(cleanedUrl)}`
+          : cleanedUrl;
 
         const shortenResponse = await fetch("https://ali-short-proxy.onrender.com/shorten", {
           method: "POST",
