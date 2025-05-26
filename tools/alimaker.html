@@ -146,10 +146,6 @@
     .copied.show {
       opacity: 1;
     }
-
-    .hidden {
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -157,11 +153,7 @@
   <h1>Сокращатель ссылок</h1>
 
   <div class="container">
-    <!-- Кнопка вставки из буфера, будет скрыта, если Clipboard API недоступен -->
-    <button class="btn hidden" id="pasteBtn" onclick="pasteFromClipboard()">Вставить из буфера</button>
-
     <input type="text" id="linkInput" placeholder="Вставьте или введите ссылку">
-
     <button class="btn" onclick="shortenLink()">Сократить</button>
 
     <div class="spinner" id="spinner"></div>
@@ -174,26 +166,6 @@
   </div>
 
   <script>
-    // Проверка поддержки Clipboard API и отображение кнопки
-    document.addEventListener('DOMContentLoaded', () => {
-      const pasteBtn = document.getElementById('pasteBtn');
-      if (navigator.clipboard && navigator.clipboard.readText) {
-        pasteBtn.classList.remove('hidden');
-      }
-    });
-
-    async function pasteFromClipboard() {
-      const input = document.getElementById('linkInput');
-
-      try {
-        const text = await navigator.clipboard.readText();
-        input.value = text;
-      } catch (err) {
-        alert("Не удалось получить текст из буфера обмена.");
-        console.error(err);
-      }
-    }
-
     async function shortenLink() {
       const input = document.getElementById('linkInput');
       const originalUrl = input.value.trim();
