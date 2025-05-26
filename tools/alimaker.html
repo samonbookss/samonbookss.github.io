@@ -91,6 +91,13 @@
       text-align: center;
       font-weight: 500;
       font-size: 16px;
+      color: #1a1a1a;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .short-link:hover {
+      background: #e6e6e6;
     }
 
     .copy-btn {
@@ -154,7 +161,7 @@
     <div class="spinner" id="spinner"></div>
 
     <div class="result" id="result" style="display: none;">
-      <div class="short-link" id="shortLink"></div>
+      <a class="short-link" id="shortLink" href="#" target="_blank" rel="noopener noreferrer"></a>
       <button class="copy-btn" onclick="copyToClipboard()">Скопировать</button>
       <div class="copied" id="copiedMsg">Скопировано!</div>
     </div>
@@ -172,6 +179,7 @@
 
       resultBox.style.display = 'none';
       shortLinkBox.textContent = '';
+      shortLinkBox.href = '#';
       copiedMsg.classList.remove('show');
 
       if (!originalUrl) {
@@ -201,8 +209,10 @@
 
         if (response.ok && data.url) {
           shortLinkBox.textContent = data.url;
+          shortLinkBox.href = data.url;
         } else {
           shortLinkBox.textContent = "Ошибка при сокращении ссылки.";
+          shortLinkBox.href = "#";
         }
 
         resultBox.style.display = 'flex';
