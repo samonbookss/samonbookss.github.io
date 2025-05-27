@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Добавить пост</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:,"> <!-- Убираем ошибку favicon -->
+  <link rel="icon" href="data:,">
   <style>
     :root {
       --bg-color: #121212;
@@ -136,7 +136,6 @@
     </form>
   </div>
 
-  <!-- Подключаем Supabase как ES-модуль -->
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
@@ -153,6 +152,14 @@
       fileNameSpan.textContent = file ? `📷 ${file.name}` : '📁 Выбрать изображение';
     });
 
+    // Функция очистки имени файла
+    function sanitizeFileName(name) {
+      return name
+        .normalize('NFD')                        // нормализация Unicode
+        .replace(/[\u0300-\u036f]/g, '')         // удаление диакритических знаков
+        .replace(/[^a-zA-Z0-9._-]/g, '_');       // замена всего, кроме латиницы, цифр, . _ -
+    }
+
     document.getElementById('postForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -161,10 +168,11 @@
       let image_url = null;
 
       if (file) {
-        const filePath = `posts/${Date.now()}_${file.name}`;
+        const cleanFileName = sanitizeFileName(file.name);
+        const filePath = `posts/${Date.now()}_${cleanFileName}`;
 
         const { data, error } = await supabase.storage
-          .from('images') // Название бакета
+          .from('images')
           .upload(filePath, file, {
             cacheControl: '3600',
             upsert: false
