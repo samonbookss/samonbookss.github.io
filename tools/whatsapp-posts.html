@@ -138,10 +138,12 @@
   <!-- Подключаем Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    
     const SUPABASE_URL = 'https://dpufpgqreglbzychzbho.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwdWZwZ3FyZWdsYnp5Y2h6YmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMjU4ODYsImV4cCI6MjA2MzkwMTg4Nn0.ihHiSpgA5a6sgcImw11mcUHb_UGQmFoXN9yZot-SuUY';
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const fileInput = document.getElementById('image');
     const fileNameSpan = document.getElementById('fileName');
