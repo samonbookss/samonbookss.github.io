@@ -135,65 +135,65 @@
     </form>
   </div>
 
+  <!-- Подключаем Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
-    const SUPABASE_URL = 'https://dpufpgqreglbzychzbho.supabase.co'; // Замените на ваш URL
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwdWZwZ3FyZWdsYnp5Y2h6YmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMjU4ODYsImV4cCI6MjA2MzkwMTg4Nn0.ihHiSpgA5a6sgcImw11mcUHb_UGQmFoXN9yZot-SuUY'; // Замените на ваш ключ
+    const SUPABASE_URL = 'https://dpufpgqreglbzychzbho.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwdWZwZ3FyZWdsYnp5Y2h6YmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMjU4ODYsImV4cCI6MjA2MzkwMTg4Nn0.ihHiSpgA5a6sgcImw11mcUHb_UGQmFoXN9yZot-SuUY';
 
-    document.getElementById('image').addEventListener('change', function () {
-      const fileNameSpan = document.getElementById('fileName');
-      const file = this.files[0];
-      if (file) {
-        fileNameSpan.textContent = `📷 ${file.name}`;
-      } else {
-        fileNameSpan.textContent = '📁 Выбрать изображение';
-      }
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const fileInput = document.getElementById('image');
+    const fileNameSpan = document.getElementById('fileName');
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      fileNameSpan.textContent = file ? `📷 ${file.name}` : '📁 Выбрать изображение';
     });
 
     document.getElementById('postForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const text = document.getElementById('text').value;
-      const file = document.getElementById('image').files[0];
-
+      const file = fileInput.files[0];
       let image_url = null;
 
       if (file) {
         const filePath = `posts/${Date.now()}_${file.name}`;
-        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/images/${filePath}`, {
-          method: 'POST',
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': file.type
-          },
-          body: file
-        });
 
-        if (uploadRes.ok) {
-          image_url = `${SUPABASE_URL}/storage/v1/object/public/images/${filePath}`;
-        } else {
+        const { data, error } = await supabase.storage
+          .from('images') // Убедись, что бакет называется 'images'
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          console.error('Ошибка загрузки:', error);
           alert('Ошибка при загрузке изображения');
           return;
         }
+
+        const { data: publicData } = supabase
+          .storage
+          .from('images')
+          .getPublicUrl(filePath);
+
+        image_url = publicData.publicUrl;
       }
 
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
-        method: 'POST',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          Prefer: 'return=representation'
-        },
-        body: JSON.stringify({ text, image_url })
-      });
+      const { data: post, error: insertError } = await supabase
+        .from('posts')
+        .insert([{ text, image_url }])
+        .select();
 
-      if (res.ok) {
+      if (insertError) {
+        console.error('Ошибка добавления поста:', insertError);
+        alert('Ошибка при добавлении поста');
+      } else {
         alert('Пост добавлен!');
         document.getElementById('postForm').reset();
-        document.getElementById('fileName').textContent = '📁 Выбрать изображение';
-      } else {
-        alert('Ошибка при добавлении поста');
+        fileNameSpan.textContent = '📁 Выбрать изображение';
       }
     });
   </script>
