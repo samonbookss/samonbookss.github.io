@@ -53,8 +53,7 @@
       font-weight: 600;
     }
 
-    textarea,
-    input[type="datetime-local"] {
+    textarea {
       width: 100%;
       margin-bottom: 15px;
       padding: 12px;
@@ -64,23 +63,62 @@
       color: var(--text-color);
       resize: vertical;
       font-size: 14px;
-      appearance: none;
-      -webkit-appearance: none;
     }
 
-    textarea::placeholder,
-    input[type="datetime-local"]::placeholder {
+    textarea::placeholder {
       color: rgba(255, 255, 255, 0.5);
     }
 
-    input[type="datetime-local"]:hover,
     textarea:hover {
       background-color: var(--input-hover-bg);
     }
 
-    input[type="datetime-local"]:focus {
+    .datetime-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .datetime-wrapper input[type="datetime-local"] {
+      width: 100%;
+      padding: 12px;
+      padding-right: 40px;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      font-size: 14px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .datetime-wrapper input:focus {
       outline: 2px solid var(--accent-color);
       background-color: var(--input-hover-bg);
+    }
+
+    .calendar-placeholder {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.5);
+      pointer-events: none;
+      font-size: 14px;
+      transition: opacity 0.3s ease;
+      user-select: none;
+    }
+
+    @media (max-width: 768px) {
+      .calendar-placeholder {
+        display: block;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .calendar-placeholder {
+        display: none;
+      }
     }
 
     input[type="file"] {
@@ -170,7 +208,10 @@
     <form id="postForm">
       <textarea id="text" placeholder="Текст поста" rows="4" required></textarea>
 
-      <input type="datetime-local" id="publishAt" required />
+      <div class="datetime-wrapper">
+        <input type="datetime-local" id="publishAt" required />
+        <span class="calendar-placeholder" id="calendarPlaceholder">📅 Выбрать дату</span>
+      </div>
 
       <label for="image" class="file-label">
         <span id="fileName">📁 Выбрать изображение</span>
@@ -193,6 +234,8 @@
     const fileNameSpan = document.getElementById('fileName');
     const form = document.getElementById('postForm');
     const submitButton = form.querySelector('button');
+    const publishAt = document.getElementById('publishAt');
+    const calendarPlaceholder = document.getElementById('calendarPlaceholder');
 
     fileInput.addEventListener('change', () => {
       const file = fileInput.files[0];
@@ -212,6 +255,18 @@
       submitButton.textContent = 'Отправить';
     }
 
+    function updateCalendarPlaceholder() {
+      if (window.innerWidth <= 768) {
+        calendarPlaceholder.style.opacity = publishAt.value ? '0' : '1';
+      } else {
+        calendarPlaceholder.style.opacity = '0';
+      }
+    }
+
+    publishAt.addEventListener('input', updateCalendarPlaceholder);
+    window.addEventListener('resize', updateCalendarPlaceholder);
+    window.addEventListener('DOMContentLoaded', updateCalendarPlaceholder);
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -220,11 +275,11 @@
       submitButton.textContent = 'Отправка...';
 
       const text = document.getElementById('text').value;
-      const publishAt = document.getElementById('publishAt').value;
       const file = fileInput.files[0];
+      const publishDate = publishAt.value;
       let image_url = null;
 
-      if (!publishAt) {
+      if (!publishDate) {
         alert('Пожалуйста, выберите дату и время публикации');
         resetButton();
         return;
@@ -254,7 +309,7 @@
 
         const { error: insertError } = await supabase
           .from('posts')
-          .insert([{ text, image_url, publish_at: publishAt }])
+          .insert([{ text, image_url, publish_at: publishDate }])
           .select();
 
         if (insertError) throw insertError;
@@ -262,6 +317,7 @@
         alert('Пост добавлен!');
         form.reset();
         fileNameSpan.textContent = '📁 Выбрать изображение';
+        updateCalendarPlaceholder();
       } catch (error) {
         console.error('Ошибка:', error);
         alert('Произошла ошибка при добавлении поста');
