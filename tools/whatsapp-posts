@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Добавить пост</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --text-color: #ffffff;
+      --accent-color: #4f46e5;
+      --border-radius: 16px;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: var(--border-radius);
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+      resize: vertical;
+    }
+
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-label {
+      display: inline-block;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    .file-label:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    #fileName {
+      pointer-events: none;
+      font-weight: 500;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--accent-color);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #3730a3;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Добавить пост</h1>
+    <form id="postForm">
+      <textarea id="text" placeholder="Текст поста" rows="4" required></textarea>
+
+      <label for="image" class="file-label">
+        <span id="fileName">📁 Выбрать изображение</span>
+      </label>
+      <input type="file" id="image" accept="image/*" />
+
+      <button type="submit">Отправить</button>
+    </form>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://your-project-id.supabase.co'; // Замените на ваш URL
+    const SUPABASE_KEY = 'your-anon-key'; // Замените на ваш ключ
+
+    document.getElementById('image').addEventListener('change', function () {
+      const fileNameSpan = document.getElementById('fileName');
+      const file = this.files[0];
+      if (file) {
+        fileNameSpan.textContent = `📷 ${file.name}`;
+      } else {
+        fileNameSpan.textContent = '📁 Выбрать изображение';
+      }
+    });
+
+    document.getElementById('postForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const text = document.getElementById('text').value;
+      const file = document.getElementById('image').files[0];
+
+      let image_url = null;
+
+      if (file) {
+        const filePath = `posts/${Date.now()}_${file.name}`;
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/images/${filePath}`, {
+          method: 'POST',
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': file.type
+          },
+          body: file
+        });
+
+        if (uploadRes.ok) {
+          image_url = `${SUPABASE_URL}/storage/v1/object/public/images/${filePath}`;
+        } else {
+          alert('Ошибка при загрузке изображения');
+          return;
+        }
+      }
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation'
+        },
+        body: JSON.stringify({ text, image_url })
+      });
+
+      if (res.ok) {
+        alert('Пост добавлен!');
+        document.getElementById('postForm').reset();
+        document.getElementById('fileName').textContent = '📁 Выбрать изображение';
+      } else {
+        alert('Ошибка при добавлении поста');
+      }
+    });
+  </script>
+</body>
+</html>
