@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Добавить пост</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:,"> <!-- Убираем ошибку favicon -->
   <style>
     :root {
       --bg-color: #121212;
@@ -135,11 +136,10 @@
     </form>
   </div>
 
-  <!-- Подключаем Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script>
+  <!-- Подключаем Supabase как ES-модуль -->
+  <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    
+
     const SUPABASE_URL = 'https://dpufpgqreglbzychzbho.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwdWZwZ3FyZWdsYnp5Y2h6YmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMjU4ODYsImV4cCI6MjA2MzkwMTg4Nn0.ihHiSpgA5a6sgcImw11mcUHb_UGQmFoXN9yZot-SuUY';
 
@@ -164,7 +164,7 @@
         const filePath = `posts/${Date.now()}_${file.name}`;
 
         const { data, error } = await supabase.storage
-          .from('images') // Убедись, что бакет называется 'images'
+          .from('images') // Название бакета
           .upload(filePath, file, {
             cacheControl: '3600',
             upsert: false
