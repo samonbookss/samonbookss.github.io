@@ -64,6 +64,8 @@
       color: var(--text-color);
       resize: vertical;
       font-size: 14px;
+      appearance: none;
+      -webkit-appearance: none;
     }
 
     textarea::placeholder,
@@ -73,6 +75,11 @@
 
     input[type="datetime-local"]:hover,
     textarea:hover {
+      background-color: var(--input-hover-bg);
+    }
+
+    input[type="datetime-local"]:focus {
+      outline: 2px solid var(--accent-color);
       background-color: var(--input-hover-bg);
     }
 
@@ -114,10 +121,36 @@
       font-weight: 600;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      position: relative;
     }
 
     button:hover {
       background-color: #3730a3;
+    }
+
+    button.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    button.loading::after {
+      content: '';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      margin-top: -8px;
+      border: 2px solid white;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     @media (max-width: 600px) {
@@ -158,6 +191,8 @@
 
     const fileInput = document.getElementById('image');
     const fileNameSpan = document.getElementById('fileName');
+    const form = document.getElementById('postForm');
+    const submitButton = form.querySelector('button');
 
     fileInput.addEventListener('change', () => {
       const file = fileInput.files[0];
@@ -171,8 +206,18 @@
         .replace(/[^a-zA-Z0-9._-]/g, '_');
     }
 
-    document.getElementById('postForm').addEventListener('submit', async (e) => {
+    function resetButton() {
+      submitButton.disabled = false;
+      submitButton.classList.remove('loading');
+      submitButton.textContent = 'Отправить';
+    }
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      submitButton.disabled = true;
+      submitButton.classList.add('loading');
+      submitButton.textContent = 'Отправка...';
 
       const text = document.getElementById('text').value;
       const publishAt = document.getElementById('publishAt').value;
@@ -181,47 +226,48 @@
 
       if (!publishAt) {
         alert('Пожалуйста, выберите дату и время публикации');
+        resetButton();
         return;
       }
 
-      if (file) {
-        const cleanFileName = sanitizeFileName(file.name);
-        const filePath = `posts/${Date.now()}_${cleanFileName}`;
+      try {
+        if (file) {
+          const cleanFileName = sanitizeFileName(file.name);
+          const filePath = `posts/${Date.now()}_${cleanFileName}`;
 
-        const { data, error } = await supabase.storage
-          .from('images')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
+          const { error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
-        if (error) {
-          console.error('Ошибка загрузки:', error);
-          alert('Ошибка при загрузке изображения');
-          return;
+          if (uploadError) throw uploadError;
+
+          const { data: publicData } = supabase
+            .storage
+            .from('images')
+            .getPublicUrl(filePath);
+
+          image_url = publicData.publicUrl;
         }
 
-        const { data: publicData } = supabase
-          .storage
-          .from('images')
-          .getPublicUrl(filePath);
+        const { error: insertError } = await supabase
+          .from('posts')
+          .insert([{ text, image_url, publish_at: publishAt }])
+          .select();
 
-        image_url = publicData.publicUrl;
-      }
+        if (insertError) throw insertError;
 
-      const { data: post, error: insertError } = await supabase
-        .from('posts')
-        .insert([{ text, image_url, publish_at: publishAt }])
-        .select();
-
-      if (insertError) {
-        console.error('Ошибка добавления поста:', insertError);
-        alert('Ошибка при добавлении поста');
-      } else {
         alert('Пост добавлен!');
-        document.getElementById('postForm').reset();
+        form.reset();
         fileNameSpan.textContent = '📁 Выбрать изображение';
+      } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при добавлении поста');
       }
+
+      resetButton();
     });
   </script>
 </body>
