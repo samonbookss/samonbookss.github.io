@@ -14,6 +14,8 @@
       --accent-color: #4f46e5;
       --border-radius: 16px;
       --shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      --input-bg: rgba(255, 255, 255, 0.1);
+      --input-hover-bg: rgba(255, 255, 255, 0.2);
     }
 
     * {
@@ -51,19 +53,27 @@
       font-weight: 600;
     }
 
-    textarea {
+    textarea,
+    input[type="datetime-local"] {
       width: 100%;
       margin-bottom: 15px;
       padding: 12px;
       border: none;
       border-radius: 10px;
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: var(--input-bg);
       color: var(--text-color);
       resize: vertical;
+      font-size: 14px;
     }
 
-    textarea::placeholder {
+    textarea::placeholder,
+    input[type="datetime-local"]::placeholder {
       color: rgba(255, 255, 255, 0.5);
+    }
+
+    input[type="datetime-local"]:hover,
+    textarea:hover {
+      background-color: var(--input-hover-bg);
     }
 
     input[type="file"] {
@@ -75,7 +85,7 @@
       width: 100%;
       padding: 12px;
       margin-bottom: 15px;
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: var(--input-bg);
       color: rgba(255, 255, 255, 0.9);
       border-radius: 10px;
       cursor: pointer;
@@ -85,7 +95,7 @@
     }
 
     .file-label:hover {
-      background-color: rgba(255, 255, 255, 0.2);
+      background-color: var(--input-hover-bg);
     }
 
     #fileName {
@@ -127,6 +137,8 @@
     <form id="postForm">
       <textarea id="text" placeholder="Текст поста" rows="4" required></textarea>
 
+      <input type="datetime-local" id="publishAt" required />
+
       <label for="image" class="file-label">
         <span id="fileName">📁 Выбрать изображение</span>
       </label>
@@ -152,20 +164,25 @@
       fileNameSpan.textContent = file ? `📷 ${file.name}` : '📁 Выбрать изображение';
     });
 
-    // Функция очистки имени файла
     function sanitizeFileName(name) {
       return name
-        .normalize('NFD')                        // нормализация Unicode
-        .replace(/[\u0300-\u036f]/g, '')         // удаление диакритических знаков
-        .replace(/[^a-zA-Z0-9._-]/g, '_');       // замена всего, кроме латиницы, цифр, . _ -
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9._-]/g, '_');
     }
 
     document.getElementById('postForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const text = document.getElementById('text').value;
+      const publishAt = document.getElementById('publishAt').value;
       const file = fileInput.files[0];
       let image_url = null;
+
+      if (!publishAt) {
+        alert('Пожалуйста, выберите дату и время публикации');
+        return;
+      }
 
       if (file) {
         const cleanFileName = sanitizeFileName(file.name);
@@ -194,7 +211,7 @@
 
       const { data: post, error: insertError } = await supabase
         .from('posts')
-        .insert([{ text, image_url }])
+        .insert([{ text, image_url, publish_at: publishAt }])
         .select();
 
       if (insertError) {
